@@ -92,34 +92,28 @@ task.spawn(function()
             -- Ensure HRP exists
             if not hrp or not hrp.Parent then continue end
 
-            local checkPos = Vector3.new(-2.5592823, 53.6798019, 0.43986389)
             local tpPos = CFrame.new(-0.371119589, 53.6797752, -8.38937)
-            local distance = (hrp.Position - checkPos).Magnitude
-            local gifts = getAllGifts()
+            local possibleOffsets = {-4, 0, 4}
 
-            if distance <= 30 and #gifts < 1 then
-                -- Pick random offset from -4, 0, or 4
-                local possibleOffsets = {-7, 0, 7}
+            -- Continuously teleport and spam F() every 0.5 seconds
+            while true do
+                -- Pick random offsets
+                local offsetX = possibleOffsets[math.random(1, #possibleOffsets)]
+                local offsetZ = possibleOffsets[math.random(1, #possibleOffsets)]
 
-                -- Spam teleport and F() every 0.5 seconds
-                while true do
-                    local offsetX = possibleOffsets[math.random(1, #possibleOffsets)]
-                    local offsetZ = possibleOffsets[math.random(1, #possibleOffsets)]
+                -- Apply teleport
+                local newTpPos = tpPos + Vector3.new(offsetX, 0, offsetZ)
+                hrp.CFrame = newTpPos
 
-                    -- Apply offsets
-                    local newTpPos = tpPos + Vector3.new(offsetX, 0, offsetZ)
-                    hrp.CFrame = newTpPos
+                -- Call F()
+                F()
 
-                    -- Call F()
-                    F()
+                task.wait(0.5)  -- repeat every 0.5 seconds
 
-                    task.wait(1)  -- teleport and F() every 0.5 seconds
-
-                    -- Break if rooms appear
-                    rooms = workspace:FindFirstChild("CurrentRooms")
-                    if rooms and #rooms:GetChildren() > 0 then
-                        break
-                    end
+                -- Break if rooms appear
+                rooms = workspace:FindFirstChild("CurrentRooms")
+                if rooms and #rooms:GetChildren() > 0 then
+                    break
                 end
             end
 
@@ -150,6 +144,7 @@ task.spawn(function()
         end
     end
 end)
+
 
 ---------------------------------------------------------------------
 -- RAYFIELD TOGGLE
