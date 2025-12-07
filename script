@@ -1,0 +1,120 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Wins Hub",
+    Icon = 0,
+    LoadingTitle = "Loading...",
+    LoadingSubtitle = "by win",
+    ShowText = "Rayfield",
+    Theme = "Default",
+    ToggleUIKeybind = "K",
+    ConfigurationSaving = { Enabled = true, FolderName = nil, FileName = "winhub_config" },
+})
+
+local Tab = Window:CreateTab("Main")
+
+-- Auto Collect toggle
+_G.AutoCollect = false
+
+local player = game.Players.LocalPlayer
+local hrp
+
+-- Re-acquire character and HRP if player respawns
+local function getCharacter()
+    local char = player.Character or player.CharacterAdded:Wait()
+    hrp = char:WaitForChild("HumanoidRootPart")
+end
+
+getCharacter()
+player.CharacterAdded:Connect(function()
+    getCharacter()
+end)
+
+local itemPools = workspace:WaitForChild("ItemPools")
+local normalGifts = itemPools:WaitForChild("NormalGifts")
+local goldenGifts = itemPools:WaitForChild("GoldenGifts")
+local beacon = workspace:WaitForChild("Beacon")
+
+---------------------------------------------------------------------
+-- FUNCTION: Get all gifts with Transparency == 0
+---------------------------------------------------------------------
+local function getAllGifts()
+    local gifts = {}
+
+    for _, gift in ipairs(normalGifts:GetChildren()) do
+        if gift:IsA("BasePart") and gift.Transparency == 0 then
+            gift.CanCollide = false
+            table.insert(gifts, gift)
+        end
+    end
+
+    for _, gold in ipairs(goldenGifts:GetChildren()) do
+        if gold:IsA("BasePart") and gold.Transparency == 0 then
+            gold.CanCollide = false
+            table.insert(gifts, gold)
+        end
+    end
+
+    return gifts
+end
+
+---------------------------------------------------------------------
+-- FUNCTION: Find nearest part
+---------------------------------------------------------------------
+local function getNearest(pos, list)
+    local nearest, dist = nil, math.huge
+    for _, part in ipairs(list) do
+        local d = (pos - part.Position).Magnitude
+        if d < dist then
+            nearest = part
+            dist = d
+        end
+    end
+    return nearest
+end
+
+---------------------------------------------------------------------
+-- CONTINUOUS AUTO-COLLECT LOOP
+---------------------------------------------------------------------
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        if not _G.AutoCollect then continue end
+
+        -- Only run if there are rooms
+        local rooms = workspace:FindFirstChild("CurrentRooms")
+        if not rooms or #rooms:GetChildren() == 0 then
+            -- Do nothing if no rooms
+            continue
+        end
+
+        -- Ensure HRP exists (player alive)
+        if not hrp or not hrp.Parent then
+            continue
+        end
+
+        local gifts = getAllGifts()
+
+        if #gifts > 0 then
+            local nearest = getNearest(hrp.Position, gifts)
+            if nearest then
+                hrp.CFrame = CFrame.new(nearest.Position + Vector3.new(0, -0.4, 0))
+            end
+        else
+            -- No gifts, teleport to beacon
+            hrp.CFrame = CFrame.new(beacon.Position + Vector3.new(0, 0, 0))
+        end
+    end
+end)
+
+---------------------------------------------------------------------
+-- RAYFIELD TOGGLE
+---------------------------------------------------------------------
+Tab:CreateToggle({
+    Name = "Auto Collect Gifts",
+    CurrentValue = false,
+    Flag = "AutoGift",
+    Callback = function(Value)
+        _G.AutoCollect = Value
+    end,
+})
