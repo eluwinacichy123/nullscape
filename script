@@ -83,38 +83,51 @@ end
 ---------------------------------------------------------------------
 task.spawn(function()
     while true do
-        task.wait(0.178)
+        task.wait(0.1)
         if not _G.AutoCollect then continue end
 
         -- Only run if there are rooms
         local rooms = workspace:FindFirstChild("CurrentRooms")
         if not rooms or #rooms:GetChildren() == 0 then
+
+            -- Safe zone check + F press logic
             local checkPos = Vector3.new(-2.5592823, 53.6798019, 0.43986389)
             local tpPos = CFrame.new(-0.371119589, 53.6797752, -8.38937)
             local distance = (hrp.Position - checkPos).Magnitude
-        if distance <= 10 and #gifts < 1 and #rooms:GetChildren() == 0 then
-            hrp.CFrame = tpPos
-            F() -- press F
+            local gifts = getAllGifts()
+
+            if distance <= 10 and #gifts < 1 then
+                hrp.CFrame = tpPos
+                F()
+            end
+
             continue
         end
 
-        -- Ensure HRP exists (player alive)
-        if not hrp or not hrp.Parent then
-            continue
-        end
+        -- Ensure HRP exists
+        if not hrp or not hrp.Parent then continue end
 
         local gifts = getAllGifts()
 
+        -- If gifts exist -> go collect them
         if #gifts > 0 then
             local nearest = getNearest(hrp.Position, gifts)
             if nearest then
                 hrp.CFrame = CFrame.new(nearest.Position + Vector3.new(0, -0.4, 0))
             end
+
         else
-            -- No gifts, teleport to beacon
-            hrp.CFrame = CFrame.new(beacon.Position + Vector3.new(0, 0, 0))
+            -------------------------------
+            -- NEW: Beacon Teleport Delay
+            -------------------------------
+            task.wait(0.4)  -- wait longer before teleporting
+            local recheck = getAllGifts()
+
+            if #recheck == 0 then
+                hrp.CFrame = CFrame.new(beacon.Position + Vector3.new(0, 0, 0))
+            end
         end
-    end
+
     end
 end)
 
