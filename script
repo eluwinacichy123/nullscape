@@ -90,16 +90,23 @@ task.spawn(function()
         local rooms = workspace:FindFirstChild("CurrentRooms")
         if not rooms or #rooms:GetChildren() == 0 then
 
-            -- Safe zone check + F press logic
-            local checkPos = Vector3.new(-2.5592823, 53.6798019, 0.43986389)
-            local tpPos = CFrame.new(-0.371119589, 53.6797752, -8.38937)
-            local distance = (hrp.Position - checkPos).Magnitude
-            local gifts = getAllGifts()
+local checkPos = Vector3.new(-2.5592823, 53.6798019, 0.43986389)
+local tpPos = CFrame.new(-0.371119589, 53.6797752, -8.38937)
+local distance = (hrp.Position - checkPos).Magnitude
+local gifts = getAllGifts()
 
-            if distance <= 10 and #gifts < 1 then
-                hrp.CFrame = tpPos
-                F()
-            end
+if distance <= 10 and #gifts < 1 then
+    -- Generate random offsets between -4 and 4
+    local offsetX = math.random() * 8 - 4  -- random float from -4 to 4
+    local offsetZ = math.random() * 8 - 4  -- random float from -4 to 4
+
+    -- Apply offsets to tpPos
+    local newTpPos = tpPos + Vector3.new(offsetX, 0, offsetZ)
+
+    hrp.CFrame = newTpPos
+    F()
+end
+
 
             continue
         end
