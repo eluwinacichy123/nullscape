@@ -78,12 +78,9 @@ VIM:SendKeyEvent(true, Enum.KeyCode.F, false, game)  -- key down
 task.wait(0.1)
 VIM:SendKeyEvent(false, Enum.KeyCode.F, false, game) -- key up
 end
----------------------------------------------------------------------
--- CONTINUOUS AUTO-COLLECT LOOP
----------------------------------------------------------------------
 task.spawn(function()
     while true do
-        task.wait(0.1)
+        task.wait(0.07)
         if not _G.AutoCollect then continue end
 
         -- Only run if there are no rooms
@@ -93,29 +90,14 @@ task.spawn(function()
             if not hrp or not hrp.Parent then continue end
 
             local tpPos = CFrame.new(-0.371119589, 53.6797752, -8.38937)
-            local possibleOffsets = {-4, 0, 4}
+            local offset = Vector3.new(3, 0, 0)
 
-            -- Continuously teleport and spam F() every 0.5 seconds
-            while true do
-                -- Pick random offsets
-                local offsetX = possibleOffsets[math.random(1, #possibleOffsets)]
-                local offsetZ = possibleOffsets[math.random(1, #possibleOffsets)]
+            -- Teleport once with offset
+            hrp.CFrame = tpPos + offset
 
-                -- Apply teleport
-                local newTpPos = tpPos + Vector3.new(offsetX, 0, offsetZ)
-                hrp.CFrame = newTpPos
-
-                -- Call F()
-                F()
-
-                task.wait(0.5)  -- repeat every 0.5 seconds
-
-                -- Break if rooms appear
-                rooms = workspace:FindFirstChild("CurrentRooms")
-                if rooms and #rooms:GetChildren() > 0 then
-                    break
-                end
-            end
+            -- Wait 0.5 seconds before calling F()
+            task.wait(0.5)
+            F()
 
             continue
         end
@@ -127,7 +109,7 @@ task.spawn(function()
 
         -- If gifts exist -> go collect them
         if #gifts > 0 then
-            local nearest = getNearest(hrp.Position, gifts)
+            local nearest = getNearest(hrp.Position, gifts)  -- distance check is here
             if nearest then
                 hrp.CFrame = CFrame.new(nearest.Position + Vector3.new(0, -0.4, 0))
             end
@@ -139,16 +121,13 @@ task.spawn(function()
             local recheck = getAllGifts()
 
             if #recheck == 0 then
-                hrp.CFrame = CFrame.new(beacon.Position + Vector3.new(0, 0, 0))
+                hrp.CFrame = CFrame.new(beacon.Position)
             end
         end
     end
 end)
 
 
----------------------------------------------------------------------
--- RAYFIELD TOGGLE
----------------------------------------------------------------------
 Tab:CreateToggle({
     Name = "Auto Collect Gifts",
     CurrentValue = false,
