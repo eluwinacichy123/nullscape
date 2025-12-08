@@ -80,7 +80,7 @@ VIM:SendKeyEvent(false, Enum.KeyCode.F, false, game) -- key up
 end
 task.spawn(function()
     while true do
-        task.wait(0.07)
+        task.wait(0.1)
         if not _G.AutoCollect then continue end
 
         -- Only run if there are no rooms
@@ -117,7 +117,7 @@ task.spawn(function()
             -------------------------------
             -- Beacon Teleport Delay
             -------------------------------
-            task.wait(0.2)  -- wait longer before teleporting
+            task.wait(0.4)  -- wait longer before teleporting
             local recheck = getAllGifts()
 
             if #recheck == 0 then
@@ -127,6 +127,13 @@ task.spawn(function()
     end
 end)
 
+-- Periodic memory cleanup
+task.spawn(function()
+    while true do
+        task.wait(60)  -- every 60 seconds
+        collectgarbage()
+    end
+end)
 
 Tab:CreateToggle({
     Name = "Auto Collect Gifts",
