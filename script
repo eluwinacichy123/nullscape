@@ -97,11 +97,11 @@ task.spawn(function()
         ----------------------------------------------------
         if not rooms or #rooms:GetChildren() == 0 then
 -- SELECTION SCREEN HANDLING
+-- SELECTION SCREEN HANDLING
 local selectFolder = workspace:FindFirstChild("Select")
 if selectFolder then
     local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if hrp then
-        -- your existing selection logic here
         local enemychoice1 = {"Springer", "Bell", "Mart", "Skinwalker", "Dozer"}
         local enemychoice2 = {"NIL", "Baby", "ICBM", "Flesh", "Voidbreaker", "Telefragger"}
         local enemychoice3 = {"Guardian", "Voidbound Baby", "Voidbound Guardian", "???", "Kookoo", "Cadence"}
@@ -127,9 +127,7 @@ if selectFolder then
 
         local function inList(name, list)
             for _, v in ipairs(list) do
-                if v == name then
-                    return true
-                end
+                if v == name then return true end
             end
             return false
         end
@@ -141,37 +139,38 @@ if selectFolder then
         for _, mango in ipairs(selectFolder:GetChildren()) do
             if mango.Name == "1" or mango.Name == "2" or mango.Name == "3" then
                 local choiceName = mango:GetAttribute("ChoiceName")
-                if not choiceName or choiceName == "" then continue end
 
-                if inList(choiceName, enemychoice1) then
-                    enemy1TP = mango
-                elseif inList(choiceName, enemychoice2) then
-                    enemy2TP = mango
-                elseif inList(choiceName, enemychoice3) then
-                    enemy3TP = mango
-                elseif inList(choiceName, cursechoice1) then
-                    curse1TP = mango
-                elseif inList(choiceName, cursechoice2) then
-                    curse2TP = mango
+                if choiceName then
+                    if inList(choiceName, enemychoice1) then
+                        enemy1TP = mango
+                    elseif inList(choiceName, enemychoice2) then
+                        enemy2TP = mango
+                    elseif inList(choiceName, enemychoice3) then
+                        enemy3TP = mango
+                    elseif inList(choiceName, cursechoice1) then
+                        curse1TP = mango
+                    elseif inList(choiceName, cursechoice2) then
+                        curse2TP = mango
+                    end
                 end
 
-                if mango.Name == "3" then
+                -- Fallback for part "3" if no valid attributes
+                if mango.Name == "3" and not choiceName then
                     fallback3 = mango
                 end
             end
         end
 
+        -- Prioritize teleport order: enemy1 → enemy2 → enemy3 → curse1 → curse2 → fallback3
         local finalTeleport = enemy1TP or enemy2TP or enemy3TP or curse1TP or curse2TP or fallback3
 
         if finalTeleport then
             hrp.CFrame = finalTeleport.CFrame
             if typeof(F) == "function" then F() end
-            print(finalTeleport)
+            print("Teleported to:", finalTeleport.Name)
         end
     end
 end
-
-
             continue
         end
 
