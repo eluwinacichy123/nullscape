@@ -96,7 +96,8 @@ task.spawn(function()
         -- SELECTION SCREEN HANDLING
         ----------------------------------------------------
         if not rooms or #rooms:GetChildren() == 0 then
-        local selectFolder = workspace:WaitForChild("Select")
+        local selectFolder = workspace.Select
+if not selectFolder then return end
 local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 
 local enemychoice1 = {"Springer", "Bell", "Mart", "Skinwalker", "Dozer"}
