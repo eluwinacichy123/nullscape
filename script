@@ -96,153 +96,76 @@ task.spawn(function()
         -- SELECTION SCREEN HANDLING
         ----------------------------------------------------
         if not rooms or #rooms:GetChildren() == 0 then
-            local selectFolder = workspace:FindFirstChild("Select")
-            if not selectFolder then
-                continue
-            end
+        local selectFolder = workspace.Select
+local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 
-            -----------------------
-            -- Choice Lists
-            -----------------------
-            local enemychoice1 = {
-                "Springer","Bell","Mart","Skinwalker","Dozer"
-            }
-            local enemychoice2 = {
-                "NIL","Baby","Flesh","Voidbreaker","Telefragger"
-            }
-            local enemychoice3 = {
-                "Guardian","VoidboundBaby","VoidboundGuardian","???","Kookoo","Cadence","ICBM"
-            }
+local enemychoice1 = {"Springer", "Bell", "Mart", "Skinwalker", "Dozer"}
+local enemychoice2 = {"NIL", "Baby", "ICBM", "Flesh", "Voidbreaker", "Telefragger"}
+local enemychoice3 = {"Guardian", "Voidbound Baby", "Voidbound Guardian", "???", "Kookoo", "Cadence"}
 
-           local cursechoice1 = {
-    "IceTiles",
-    "LowerGravity",
-    "RandomSpawn",
-    "WeakJumpPads",
-    "BiggerTripmine",
-    "Delusion",
-    "HighRoller",
-    "Tripmines",
-    "MoreStairs",
-    "Tripnuke",
-    "TweakedOdds",
-    "FakeCount",
-    "FasterLevelDestroy",
-    "CrayonEnemies",
-    "Barotrauma",
-    "UnderwaterMinefield",
-    "BeaconMirage",
-    "MartTransform",
-    "BellTargetEnemy",
-    "FasterSkinwalker",
-    "SlowerSkinwalker",
-    "SkinwalkerPresence",
-    "TallSkinwalker",
-    "TripleSkinwalker",
-    "RandomSkinwalker",
-    "Springloaded",
-    "MightyChivalry",
-    "Telestabber",
-    "NilMirage",
-    "BabyNoIndicator",
-    "Shotgun",
-    "Camouflage",
-    "Malware",
-    "TrapCard",
-    "Run",
-    "FragileTiles",
-    "TelefragNoSound"
+local cursechoice1 = {
+    "IceTiles", "LowerGravity", "RandomSpawn", "WeakJumpPads", "BiggerTripmine",
+    "Delusion", "HighRoller", "Tripmines", "MoreStairs", "Tripnuke",
+    "TweakedOdds", "FakeCount", "FasterLevelDestroy", "CrayonEnemies", "Barotrauma",
+    "UnderwaterMinefield", "BeaconMirage", "MartTransform", "BellTargetEnemy",
+    "FasterSkinwalker", "SlowerSkinwalker", "SkinwalkerPresence", "TallSkinwalker",
+    "TripleSkinwalker", "RandomSkinwalker", "Springloaded", "MightyChivalry",
+    "Telestabber", "NilMirage", "BabyNoIndicator", "Shotgun", "Camouflage",
+    "Malware", "TrapCard", "Run", "FragileTiles", "TelefragNoSound"
 }
 
 local cursechoice2 = {
-    "Nothing",
-    "Lap2",
-    "SavoryRing",
-    "ScatteredGifts",
-    "MartSlide",
-    "FleshHighReach",
-    "NilChase",
-    "ICBMBig",
-    "TripleICBM",
-    "ProblemChild",
-    "BlueCheese",
-    "OneLessChoice",
-    "InverseDestruction",
-    "VoidImplosions",
-    "Sorrow",
-    "Doombringer",
-    "Tantrum",
-    "Rebirth",
-    "FleshNoDespawn",
-    "VoidbreakerRapidFire",
-    "VoidbreakerSlowFire"
+    "Nothing", "Lap2", "SavoryRing", "ScatteredGifts", "MartSlide",
+    "FleshHighReach", "NilChase", "ICBMBig", "TripleICBM", "ProblemChild",
+    "BlueCheese", "OneLessChoice", "InverseDestruction", "VoidImplosions",
+    "Sorrow", "Doombringer", "Tantrum", "Rebirth", "FleshNoDespawn",
+    "VoidbreakerRapidFire", "VoidbreakerSlowFire"
 }
 
+local function inList(name, list)
+    for _, v in ipairs(list) do
+        if v == name then
+            return true
+        end
+    end
+    return false
+end
 
-            local function inList(name, list)
-                for _, v in ipairs(list) do
-                    if v == name then return true end
-                end
-                return false
-            end
+local enemy1TP, enemy2TP, enemy3TP = nil, nil, nil
+local curse1TP, curse2TP = nil, nil
+local fallback3 = nil
 
-            -----------------------
-            -- Priority Variables
-            -----------------------
-            local enemy1, enemy2, enemy3 = nil, nil, nil
-            local curse1, curse2 = nil, nil
-            local fallback3 = nil
+for _, mango in ipairs(selectFolder:GetChildren()) do
+    if mango.Name == "1" or mango.Name == "2" or mango.Name == "3" then
+        local choiceName = mango:GetAttribute("ChoiceName")
+        if not choiceName or choiceName == "" then continue end
 
-            for _, mango in ipairs(selectFolder:GetChildren()) do
-                if mango.Name == "1" or mango.Name == "2" or mango.Name == "3" then
+        if inList(choiceName, enemychoice1) then
+            enemy1TP = mango
+        elseif inList(choiceName, enemychoice2) then
+            enemy2TP = mango
+        elseif inList(choiceName, enemychoice3) then
+            enemy3TP = mango
+        elseif inList(choiceName, cursechoice1) then
+            curse1TP = mango
+        elseif inList(choiceName, cursechoice2) then
+            curse2TP = mango
+        end
 
-                    if mango.Name == "3" then
-                        fallback3 = mango
-                    end
+        -- Only assign fallback3 if this part is literally unused
+        if mango.Name == "3" and not inList(choiceName, cursechoice1) and not inList(choiceName, cursechoice2)
+            and not inList(choiceName, enemychoice1) and not inList(choiceName, enemychoice2) and not inList(choiceName, enemychoice3) then
+            fallback3 = mango
+        end
+    end
+end
 
-                    local choiceName = mango:GetAttribute("ChoiceName")
+local finalTeleport = enemy1TP or enemy2TP or enemy3TP or curse1TP or curse2TP or fallback3
 
-                    if not choiceName or choiceName == "" then 
-                        continue 
-                    end
-
-                    -- Enemy Priority
-                    if inList(choiceName, enemychoice1) then
-                        enemy1 = mango
-                    elseif inList(choiceName, enemychoice2) then
-                        enemy2 = mango
-                    elseif inList(choiceName, enemychoice3) then
-                        enemy3 = mango
-                    end
-
-                    -- Curse Priority
-                    if inList(choiceName, cursechoice1) then
-                        curse1 = mango
-                    elseif inList(choiceName, cursechoice2) then
-                        curse2 = mango
-                    end
-                end
-            end
-
-            -----------------------
-            -- FINAL PRIORITY PICK
-            -----------------------
-            local finalTeleport =
-                enemy1 or curse1 or
-                enemy2 or curse2 or
-                enemy3 or
-                fallback3
-
-            if finalTeleport then
-                if finalTeleport == fallback3 then
-                end
-                hrp.CFrame = finalTeleport.CFrame
-
-                if typeof(F) == "function" then
-                    F()
-                end
-
-            end
+if finalTeleport and hrp and hrp.Parent then
+    hrp.CFrame = finalTeleport.CFrame
+    if typeof(F) == "function" then F() end
+end
 
             continue
         end
