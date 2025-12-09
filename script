@@ -80,19 +80,12 @@ VIM:SendKeyEvent(false, Enum.KeyCode.F, false, game) -- key up
 end
 local DEBUG = true  -- set to false to mute logs
 
-local function log(msg)
-    if DEBUG then
-        print("[DEBUG] " .. msg)
-    end
-end
 
 task.spawn(function()
     while true do
-        task.wait(0.075)
+        task.wait(0.065)
         if not _G.AutoCollect then continue end
-        if workspace.Enemies or #workspace.Enemies:GetChildren() > 0 then
-        workspace.Enemies:ClearAllChildren()
-        end
+
         local character = game.Players.LocalPlayer.Character
         local hrp = character and character:FindFirstChild("HumanoidRootPart")
         if not hrp then continue end
@@ -103,12 +96,8 @@ task.spawn(function()
         -- SELECTION SCREEN HANDLING
         ----------------------------------------------------
         if not rooms or #rooms:GetChildren() == 0 then
-
-            log("=== SELECTION SCREEN DETECTED ===")
-
             local selectFolder = workspace:FindFirstChild("Select")
             if not selectFolder then
-                log("Select folder missing!")
                 continue
             end
 
@@ -119,28 +108,76 @@ task.spawn(function()
                 "Springer","Bell","Mart","Skinwalker","Dozer"
             }
             local enemychoice2 = {
-                "NIL","Baby","ICBM","Flesh","Voidbreaker","Telefragger"
+                "NIL","Baby","Flesh","Voidbreaker","Telefragger"
             }
             local enemychoice3 = {
-                "Guardian","Voidbound Baby","Voidbound Guardian","???","Kookoo","Cadence"
+                "Guardian","VoidboundBaby","VoidboundGuardian","???","Kookoo","Cadence","ICBM"
             }
 
-            local cursechoice1 = {
-                "Ice Tiles","Lower Gravity","Random Spawn","Weaker Jumppads","Bigger Tripmines",
-                "Delusion","High Roller","More Tripmines","Stairs... Stairs...","Tripnuke",
-                "Tweaked Odds","Fake Count","Fragile Gifts","Crayonify","Barotrauma","Minefield",
-                "Beacon Mirage","Mart Infection","More Ringing","Closer Skinwalker","Further Skinwalker",
-                "Skinwalker Presence","Taller Skinwalker","Conga Line","Random Skinwalker",
-                "Springloaded","Mighty Chivalry","Telestabber","[CONTENT REMOVED]","Pacifier",
-                "Shotgun","Camouflage","Idiotware","Trap Card","Run","Hollow Tiles","Muted"
-            }
+           local cursechoice1 = {
+    "IceTiles",
+    "LowerGravity",
+    "RandomSpawn",
+    "WeakJumpPads",
+    "BiggerTripmine",
+    "Delusion",
+    "HighRoller",
+    "Tripmines",
+    "MoreStairs",
+    "Tripnuke",
+    "TweakedOdds",
+    "FakeCount",
+    "FasterLevelDestroy",
+    "CrayonEnemies",
+    "Barotrauma",
+    "UnderwaterMinefield",
+    "BeaconMirage",
+    "MartTransform",
+    "BellTargetEnemy",
+    "FasterSkinwalker",
+    "SlowerSkinwalker",
+    "SkinwalkerPresence",
+    "TallSkinwalker",
+    "TripleSkinwalker",
+    "RandomSkinwalker",
+    "Springloaded",
+    "MightyChivalry",
+    "Telestabber",
+    "NilMirage",
+    "BabyNoIndicator",
+    "Shotgun",
+    "Camouflage",
+    "Malware",
+    "TrapCard",
+    "Run",
+    "FragileTiles",
+    "TelefragNoSound"
+}
 
-            local cursechoice2 = {
-                "Nothing?","LAP 2","Savory Ring","Scattered Gifts","Mart Slide","Bloodier Meat",
-                "[REDACTED]","Bigger Blast","Missle Silo","Problem Child","Blue Cheese",
-                "One Less Choice","Inverse Destruction","Void Implosions","Sorrow","Doombringer",
-                "Tantrum","Rebirth","Mass Infection","Ballet of Blades","Blade Bombardment"
-            }
+local cursechoice2 = {
+    "Nothing",
+    "Lap2",
+    "SavoryRing",
+    "ScatteredGifts",
+    "MartSlide",
+    "FleshHighReach",
+    "NilChase",
+    "ICBMBig",
+    "TripleICBM",
+    "ProblemChild",
+    "BlueCheese",
+    "OneLessChoice",
+    "InverseDestruction",
+    "VoidImplosions",
+    "Sorrow",
+    "Doombringer",
+    "Tantrum",
+    "Rebirth",
+    "FleshNoDespawn",
+    "VoidbreakerRapidFire",
+    "VoidbreakerSlowFire"
+}
+
 
             local function inList(name, list)
                 for _, v in ipairs(list) do
@@ -161,37 +198,28 @@ task.spawn(function()
 
                     if mango.Name == "3" then
                         fallback3 = mango
-                        log("Found fallback '3' button.")
                     end
 
                     local choiceName = mango:GetAttribute("ChoiceName")
 
-                    log("Checking button " .. mango.Name .. ": " .. tostring(choiceName))
-
                     if not choiceName or choiceName == "" then 
-                        log(" → Empty choice, skipping.")
                         continue 
                     end
 
                     -- Enemy Priority
                     if inList(choiceName, enemychoice1) then
                         enemy1 = mango
-                        log(" → Matched ENEMY CHOICE 1")
                     elseif inList(choiceName, enemychoice2) then
                         enemy2 = mango
-                        log(" → Matched ENEMY CHOICE 2")
                     elseif inList(choiceName, enemychoice3) then
                         enemy3 = mango
-                        log(" → Matched ENEMY CHOICE 3")
                     end
 
                     -- Curse Priority
                     if inList(choiceName, cursechoice1) then
                         curse1 = mango
-                        log(" → Matched CURSE CHOICE 1")
                     elseif inList(choiceName, cursechoice2) then
                         curse2 = mango
-                        log(" → Matched CURSE CHOICE 2")
                     end
                 end
             end
@@ -206,24 +234,16 @@ task.spawn(function()
                 fallback3
 
             if finalTeleport then
-                log("FINAL PICK → Button " .. finalTeleport.Name ..
-                    " (Position: " .. tostring(finalTeleport.Position) .. ")")
-
                 if finalTeleport == fallback3 then
-                    log(" → USING FALLBACK (button '3')")
                 end
-
                 hrp.CFrame = finalTeleport.CFrame
 
                 if typeof(F) == "function" then
-                    log("Running F()")
                     F()
                 end
-            else
-                log("ERROR: No teleport candidate found at all!")
+
             end
 
-            log("=== END SELECTION DEBUG ===")
             continue
         end
 
