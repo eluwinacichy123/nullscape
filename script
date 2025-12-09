@@ -155,8 +155,7 @@ if selectFolder then
                     curse2TP = mango
                 end
 
-                if mango.Name == "3" and not inList(choiceName, cursechoice1) and not inList(choiceName, cursechoice2)
-                    and not inList(choiceName, enemychoice1) and not inList(choiceName, enemychoice2) and not inList(choiceName, enemychoice3) then
+                if mango.Name == "3" then
                     fallback3 = mango
                 end
             end
