@@ -165,6 +165,7 @@ local finalTeleport = enemy1TP or enemy2TP or enemy3TP or curse1TP or curse2TP o
 if finalTeleport and hrp and hrp.Parent then
     hrp.CFrame = finalTeleport.CFrame
     if typeof(F) == "function" then F() end
+print(finalTeleport)
 end
 
             continue
