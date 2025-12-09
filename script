@@ -78,65 +78,188 @@ VIM:SendKeyEvent(true, Enum.KeyCode.F, false, game)  -- key down
 task.wait(0.1)
 VIM:SendKeyEvent(false, Enum.KeyCode.F, false, game) -- key up
 end
+local DEBUG = true  -- set to false to mute logs
+
+local function log(msg)
+    if DEBUG then
+        print("[DEBUG] " .. msg)
+    end
+end
+
 task.spawn(function()
     while true do
         task.wait(0.075)
         if not _G.AutoCollect then continue end
-workspace.Enemies:ClearAllChildren()
+        if workspace.Enemies or #workspace.Enemies:GetChildren() > 0 then
+        workspace.Enemies:ClearAllChildren()
+        end
+        local character = game.Players.LocalPlayer.Character
+        local hrp = character and character:FindFirstChild("HumanoidRootPart")
+        if not hrp then continue end
 
-
-        -- Only run if there are no rooms
         local rooms = workspace:FindFirstChild("CurrentRooms")
+
+        ----------------------------------------------------
+        -- SELECTION SCREEN HANDLING
+        ----------------------------------------------------
         if not rooms or #rooms:GetChildren() == 0 then
-            -- Ensure HRP exists
-            if not hrp or not hrp.Parent then continue end
 
-            local tpPos = CFrame.new(-0.371119589, 53.6797752, -8.38937)
-            local offset = Vector3.new(3, 0, 0)
+            log("=== SELECTION SCREEN DETECTED ===")
 
-            -- Teleport once with offset
-            hrp.CFrame = tpPos + offset
+            local selectFolder = workspace:FindFirstChild("Select")
+            if not selectFolder then
+                log("Select folder missing!")
+                continue
+            end
 
-            -- Wait 0.5 seconds before calling F()
-            task.wait(0.5)
-            F()
+            -----------------------
+            -- Choice Lists
+            -----------------------
+            local enemychoice1 = {
+                "Springer","Bell","Mart","Skinwalker","Dozer"
+            }
+            local enemychoice2 = {
+                "NIL","Baby","ICBM","Flesh","Voidbreaker","Telefragger"
+            }
+            local enemychoice3 = {
+                "Guardian","Voidbound Baby","Voidbound Guardian","???","Kookoo","Cadence"
+            }
 
+            local cursechoice1 = {
+                "Ice Tiles","Lower Gravity","Random Spawn","Weaker Jumppads","Bigger Tripmines",
+                "Delusion","High Roller","More Tripmines","Stairs... Stairs...","Tripnuke",
+                "Tweaked Odds","Fake Count","Fragile Gifts","Crayonify","Barotrauma","Minefield",
+                "Beacon Mirage","Mart Infection","More Ringing","Closer Skinwalker","Further Skinwalker",
+                "Skinwalker Presence","Taller Skinwalker","Conga Line","Random Skinwalker",
+                "Springloaded","Mighty Chivalry","Telestabber","[CONTENT REMOVED]","Pacifier",
+                "Shotgun","Camouflage","Idiotware","Trap Card","Run","Hollow Tiles","Muted"
+            }
+
+            local cursechoice2 = {
+                "Nothing?","LAP 2","Savory Ring","Scattered Gifts","Mart Slide","Bloodier Meat",
+                "[REDACTED]","Bigger Blast","Missle Silo","Problem Child","Blue Cheese",
+                "One Less Choice","Inverse Destruction","Void Implosions","Sorrow","Doombringer",
+                "Tantrum","Rebirth","Mass Infection","Ballet of Blades","Blade Bombardment"
+            }
+
+            local function inList(name, list)
+                for _, v in ipairs(list) do
+                    if v == name then return true end
+                end
+                return false
+            end
+
+            -----------------------
+            -- Priority Variables
+            -----------------------
+            local enemy1, enemy2, enemy3 = nil, nil, nil
+            local curse1, curse2 = nil, nil
+            local fallback3 = nil
+
+            for _, mango in ipairs(selectFolder:GetChildren()) do
+                if mango.Name == "1" or mango.Name == "2" or mango.Name == "3" then
+
+                    if mango.Name == "3" then
+                        fallback3 = mango
+                        log("Found fallback '3' button.")
+                    end
+
+                    local choiceName = mango:GetAttribute("ChoiceName")
+
+                    log("Checking button " .. mango.Name .. ": " .. tostring(choiceName))
+
+                    if not choiceName or choiceName == "" then 
+                        log(" → Empty choice, skipping.")
+                        continue 
+                    end
+
+                    -- Enemy Priority
+                    if inList(choiceName, enemychoice1) then
+                        enemy1 = mango
+                        log(" → Matched ENEMY CHOICE 1")
+                    elseif inList(choiceName, enemychoice2) then
+                        enemy2 = mango
+                        log(" → Matched ENEMY CHOICE 2")
+                    elseif inList(choiceName, enemychoice3) then
+                        enemy3 = mango
+                        log(" → Matched ENEMY CHOICE 3")
+                    end
+
+                    -- Curse Priority
+                    if inList(choiceName, cursechoice1) then
+                        curse1 = mango
+                        log(" → Matched CURSE CHOICE 1")
+                    elseif inList(choiceName, cursechoice2) then
+                        curse2 = mango
+                        log(" → Matched CURSE CHOICE 2")
+                    end
+                end
+            end
+
+            -----------------------
+            -- FINAL PRIORITY PICK
+            -----------------------
+            local finalTeleport =
+                enemy1 or curse1 or
+                enemy2 or curse2 or
+                enemy3 or
+                fallback3
+
+            if finalTeleport then
+                log("FINAL PICK → Button " .. finalTeleport.Name ..
+                    " (Position: " .. tostring(finalTeleport.Position) .. ")")
+
+                if finalTeleport == fallback3 then
+                    log(" → USING FALLBACK (button '3')")
+                end
+
+                hrp.CFrame = finalTeleport.CFrame
+
+                if typeof(F) == "function" then
+                    log("Running F()")
+                    F()
+                end
+            else
+                log("ERROR: No teleport candidate found at all!")
+            end
+
+            log("=== END SELECTION DEBUG ===")
             continue
         end
 
-        -- Ensure HRP exists
-        if not hrp or not hrp.Parent then continue end
+        ----------------------------------------------------
+        -- GIFT COLLECTION HANDLING
+        ----------------------------------------------------
 
         local gifts = getAllGifts()
 
-        -- If gifts exist -> go collect them
         if #gifts > 0 then
-            local nearest = getNearest(hrp.Position, gifts)  -- distance check is here
+            local nearest = getNearest(hrp.Position, gifts)
             if nearest then
                 hrp.CFrame = CFrame.new(nearest.Position + Vector3.new(0, 3.3, 0))
             end
+
         else
-            -------------------------------
-            -- Beacon Teleport Delay
-            -------------------------------
+            task.wait(0.3)
 
-            task.wait(0.3)  -- wait longer before teleporting
             local recheck = getAllGifts()
-
-            if #recheck == 0 then
+            if #recheck == 0 and beacon then
                 hrp.CFrame = CFrame.new(beacon.Position)
             end
         end
     end
 end)
 
--- Periodic memory cleanup
+----------------------------------------------------
+-- MEMORY CLEANUP
+----------------------------------------------------
 task.spawn(function()
     while true do
-        task.wait(60)  -- every 60 seconds
+        task.wait(60)
         collectgarbage()
     end
 end)
+
 
 Tab:CreateToggle({
     Name = "Auto Collect Gifts",
