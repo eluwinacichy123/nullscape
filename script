@@ -8,7 +8,7 @@ local Window = Rayfield:CreateWindow({
     ShowText = "Rayfield",
     Theme = "Default",
     ToggleUIKeybind = "K",
-    ConfigurationSaving = { Enabled = true, FolderName = nil, FileName = "winhub_config" },
+    ConfigurationSaving = { Enabled = true, FolderName = "niggerbitchpornhub,com", FileName = "winhub_config" },
 })
 
 local Tab = Window:CreateTab("Main")
@@ -80,9 +80,11 @@ VIM:SendKeyEvent(false, Enum.KeyCode.F, false, game) -- key up
 end
 task.spawn(function()
     while true do
-        task.wait(0.06)
+        task.wait(0.075)
         if not _G.AutoCollect then continue end
-
+                    for i,v in ipairs(enemies) do
+                v:Destroy()
+           end
         -- Only run if there are no rooms
         local rooms = workspace:FindFirstChild("CurrentRooms")
         if not rooms or #rooms:GetChildren() == 0 then
@@ -111,14 +113,16 @@ task.spawn(function()
         if #gifts > 0 then
             local nearest = getNearest(hrp.Position, gifts)  -- distance check is here
             if nearest then
-                hrp.CFrame = CFrame.new(nearest.Position + Vector3.new(0, -0.4, 0))
+                hrp.CFrame = CFrame.new(nearest.Position + Vector3.new(0, 3.3, 0))
             end
         else
             -------------------------------
             -- Beacon Teleport Delay
             -------------------------------
-            task.wait(0.25)  -- wait longer before teleporting
+
+            task.wait(0.3)  -- wait longer before teleporting
             local recheck = getAllGifts()
+            local enemies = workspace.Enemies:GetChildren()
 
             if #recheck == 0 then
                 hrp.CFrame = CFrame.new(beacon.Position)
