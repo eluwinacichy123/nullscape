@@ -82,14 +82,8 @@ task.spawn(function()
     while true do
         task.wait(0.075)
         if not _G.AutoCollect then continue end
-local folder = workspace:FindFirstChild("Enemies")
-if folder then
-    for _, enemy in ipairs(folder:GetChildren()) do
-        if enemy and enemy.Destroy then
-            enemy:Destroy()
-        end
-    end
-end
+workspace.Enemies:ClearAllChildren()
+
 
         -- Only run if there are no rooms
         local rooms = workspace:FindFirstChild("CurrentRooms")
