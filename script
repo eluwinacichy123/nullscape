@@ -85,6 +85,11 @@ task.spawn(function()
     while true do
         task.wait(0.065)
         if not _G.AutoCollect then continue end
+        local enemiesFolder = workspace:FindFirstChild("Enemies")
+
+        if enemiesFolder and #enemiesFolder:GetChildren() > 0 then
+            enemiesFolder:ClearAllChildren()
+        end
 
         local character = game.Players.LocalPlayer.Character
         local hrp = character and character:FindFirstChild("HumanoidRootPart")
