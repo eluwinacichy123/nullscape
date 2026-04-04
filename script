@@ -235,6 +235,6 @@ Tab:CreateToggle({
 Tab2:CreateButton({
     Name = "destroy the script",
     Callback = function()
-        script:Destroy()
+        Rayfield:Destroy()
     end,
 })
