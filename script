@@ -91,7 +91,7 @@ local function dodgeICBM(hrp)
 
     local icbm = enemyfolder:FindFirstChild("ICBM")
     if not icbm then return false end
-
+    
     local bottom = icbm:FindFirstChild("Bottom")
     local imageLabel = bottom and bottom:FindFirstChild("ImageLabel")
     local mark = icbm:FindFirstChild("IcbmMark")
@@ -121,6 +121,43 @@ local function dodgeICBM(hrp)
 
     return dodgingICBM
 end
+local function dodgeSpringer(hrp)
+    if dodgingSpringer then return true end
+
+    local enemyfolder = workspace:FindFirstChild("Enemies")
+    if not enemyfolder then return false end
+
+    local Spinger = enemyfolder:FindFirstChild("Springer")
+    if not Springer then return false end
+    
+    local bottom = icbm:FindFirstChild("Bottom")
+    local imageLabel = bottom and bottom:FindFirstChild("ImageLabel")
+    local mark = icbm:FindFirstChild("SpringerMark")
+
+    if not imageLabel or not mark then return false end
+
+    if (mark.Position - hrp.Position).Magnitude <= 5 then
+
+        dodgingSpringer = true
+
+        task.spawn(function()
+            local startTime = tick()
+
+            while tick() - startTime < 1 do
+                if hrp and hrp.Parent then
+                    hrp.CFrame = hrp.CFrame + Vector3.new(0, 20, 0)
+                end
+                task.wait(0.2)
+            end
+
+            dodgingSpringer = false
+        end)
+
+        return true
+    end
+
+    return dodgingSpringer
+end
 
 task.spawn(function()
     while true do
@@ -128,14 +165,8 @@ task.spawn(function()
         if not _G.AutoCollect then continue end
         local character = game.Players.LocalPlayer.Character
         local hrp = character and character:FindFirstChild("HumanoidRootPart")
-        local enemyfolder = workspace:FindFirstChild("Enemies")
-        local mart = enemyfolder:FindFirstChild("Mart")
-        local Baby = enemyfolder:FindFirstChild("Baby")
-        if mart and Baby or mart or Baby then
-        mart:Destroy()
-        Baby:Destroy()
         if not hrp then continue end
-        if dodgeICBM(hrp) then
+        if dodgeICBM(hrp) or dodgeSpringer(hrp) then
             continue
         end
         local rooms = workspace:FindFirstChild("CurrentRooms")
