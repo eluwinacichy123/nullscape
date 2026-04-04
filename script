@@ -81,6 +81,46 @@ VIM:SendKeyEvent(false, Enum.KeyCode.F, false, game) -- key up
 end
 local DEBUG = true  -- set to false to mute logs
 
+local dodgingICBM = false
+
+local function dodgeICBM(hrp)
+    if dodgingICBM then return true end
+
+    local enemyfolder = workspace:FindFirstChild("Enemies")
+    if not enemyfolder then return false end
+
+    local icbm = enemyfolder:FindFirstChild("ICBM")
+    if not icbm then return false end
+
+    local bottom = icbm:FindFirstChild("Bottom")
+    local imageLabel = bottom and bottom:FindFirstChild("ImageLabel")
+    local mark = icbm:FindFirstChild("IcbmMark")
+
+    if not imageLabel or not mark then return false end
+
+    if imageLabel.ImageTransparency == 0.25 and
+       (mark.Position - hrp.Position).Magnitude <= 5 then
+
+        dodgingICBM = true
+
+        task.spawn(function()
+            local startTime = tick()
+
+            while tick() - startTime < 1 do
+                if hrp and hrp.Parent then
+                    hrp.CFrame = hrp.CFrame + Vector3.new(0, 20, 0)
+                end
+                task.wait(0.2)
+            end
+
+            dodgingICBM = false
+        end)
+
+        return true
+    end
+
+    return dodgingICBM
+end
 
 task.spawn(function()
     while true do
@@ -89,7 +129,9 @@ task.spawn(function()
         local character = game.Players.LocalPlayer.Character
         local hrp = character and character:FindFirstChild("HumanoidRootPart")
         if not hrp then continue end
-
+        if dodgeICBM(hrp) then
+            continue
+        end
         local rooms = workspace:FindFirstChild("CurrentRooms")
 
         ----------------------------------------------------
@@ -170,6 +212,8 @@ if selectFolder and _G.AutoPick then
             print("Teleported to:", finalTeleport.Name)
         end
     end
+end
+end
 end
             continue
         end
