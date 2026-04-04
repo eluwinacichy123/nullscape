@@ -105,7 +105,7 @@ task.spawn(function()
 -- SELECTION SCREEN HANDLING
 -- SELECTION SCREEN HANDLING
 local selectFolder = workspace:FindFirstChild("Select")
-if selectFolder and not _G.AutoPick then
+if selectFolder and _G.AutoPick then
     local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if hrp then
         local enemychoice1 = {"Skinwalker", "Bell", "Mart", "Springer", "Dozer"}
@@ -226,13 +226,13 @@ Tab:CreateToggle({
 Tab:CreateToggle({
     Name = "Auto pick enemies & curses",
     CurrentValue = false,
-    Flag = "AutoPick"
+    Flag = "AutoPick",
     Callback = function(Value)
         _G.AutoPick = Value
     end,
 })
 
-Tab:CreateButton({
+Tab2:CreateButton({
     Name = "destroy the script",
     Callback = function()
         script:Destroy()
