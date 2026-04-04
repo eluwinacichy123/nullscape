@@ -12,9 +12,10 @@ local Window = Rayfield:CreateWindow({
 })
 
 local Tab = Window:CreateTab("Main")
-
+local Tab2 = Window:CreateTab("kill the script")
 -- Auto Collect toggle
 _G.AutoCollect = false
+_G.AutoPick = false
 
 local player = game.Players.LocalPlayer
 local hrp
@@ -104,10 +105,10 @@ task.spawn(function()
 -- SELECTION SCREEN HANDLING
 -- SELECTION SCREEN HANDLING
 local selectFolder = workspace:FindFirstChild("Select")
-if selectFolder then
+if selectFolder and not _G.AutoPick then
     local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if hrp then
-        local enemychoice1 = {"Springer", "Bell", "Mart", "Skinwalker", "Dozer"}
+        local enemychoice1 = {"Skinwalker", "Bell", "Mart", "Springer", "Dozer"}
         local enemychoice2 = {"NIL", "Baby", "ICBM", "Flesh", "Voidbreaker", "Telefragger"}
         local enemychoice3 = {"Guardian", "Voidbound Baby", "Voidbound Guardian", "???", "Kookoo", "Cadence"}
 
@@ -219,5 +220,21 @@ Tab:CreateToggle({
     Flag = "AutoGift",
     Callback = function(Value)
         _G.AutoCollect = Value
+    end,
+})
+
+Tab:CreateToggle({
+    Name = "Auto pick enemies & curses",
+    CurrentValue = false,
+    Flag = "AutoPick"
+    Callback = function(Value)
+        _G.AutoPick = Value
+    end,
+})
+
+Tab:CreateButton({
+    Name = "destroy the script",
+    Callback = function()
+        script:Destroy()
     end,
 })
