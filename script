@@ -128,6 +128,12 @@ task.spawn(function()
         if not _G.AutoCollect then continue end
         local character = game.Players.LocalPlayer.Character
         local hrp = character and character:FindFirstChild("HumanoidRootPart")
+        local enemyfolder = workspace:FindFirstChild("Enemies")
+        local mart = enemyfolder:FindFirstChild("Mart")
+        local Baby = enemyfolder:FindFirstChild("Baby")
+        if mart and Baby or mart or Baby then
+        mart:Destroy()
+        Baby:Destroy()
         if not hrp then continue end
         if dodgeICBM(hrp) then
             continue
@@ -212,6 +218,7 @@ if selectFolder and _G.AutoPick then
             print("Teleported to:", finalTeleport.Name)
         end
     end
+end
 end
             continue
         end
