@@ -8,14 +8,16 @@ local Window = Rayfield:CreateWindow({
     ShowText = "Rayfield",
     Theme = "Default",
     ToggleUIKeybind = "K",
-    ConfigurationSaving = { Enabled = true, FolderName = "niggerbitchpornhub,com", FileName = "winhub_config" },
+    ConfigurationSaving = { Enabled = true, FolderName = "winshub65123", FileName = "winhub_config" },
 })
 
 local Tab = Window:CreateTab("Main")
 local Tab2 = Window:CreateTab("kill the script")
--- Auto Collect toggle
+local busy = false  -- global lock for movement
+
 _G.AutoCollect = false
 _G.AutoPick = false
+_G.AutoAltar = false
 
 local player = game.Players.LocalPlayer
 local hrp
@@ -121,23 +123,21 @@ local function dodgeICBM(hrp)
 
     return dodgingICBM
 end
+local dodgingSpringer = false
+
 local function dodgeSpringer(hrp)
     if dodgingSpringer then return true end
 
     local enemyfolder = workspace:FindFirstChild("Enemies")
     if not enemyfolder then return false end
 
-    local Spinger = enemyfolder:FindFirstChild("Springer")
-    if not Springer then return false end
-    
-    local bottom = icbm:FindFirstChild("Bottom")
-    local imageLabel = bottom and bottom:FindFirstChild("ImageLabel")
-    local mark = icbm:FindFirstChild("SpringerMark")
+    local springer = enemyfolder:FindFirstChild("Springer")
+    if not springer then return false end
 
-    if not imageLabel or not mark then return false end
+    local mark = springer:FindFirstChild("SpringerMark")
+    if not mark then return false end
 
     if (mark.Position - hrp.Position).Magnitude <= 5 then
-
         dodgingSpringer = true
 
         task.spawn(function()
@@ -156,24 +156,58 @@ local function dodgeSpringer(hrp)
         return true
     end
 
-    return dodgingSpringer
+    return false
 end
 
 task.spawn(function()
     while true do
         task.wait(0.065)
-        if not _G.AutoCollect then continue end
+        if not _G.AutoCollect and not _G.AutoAltar and not _G.AutoPick then
+            continue
+        end
         local character = game.Players.LocalPlayer.Character
         local hrp = character and character:FindFirstChild("HumanoidRootPart")
         if not hrp then continue end
         if dodgeICBM(hrp) or dodgeSpringer(hrp) then
             continue
         end
-        local rooms = workspace:FindFirstChild("CurrentRooms")
+local rooms = workspace:FindFirstChild("CurrentRooms")
 
-        ----------------------------------------------------
-        -- SELECTION SCREEN HANDLING
-        ----------------------------------------------------
+if _G.AutoAltar and not busy then
+    busy = true  -- lock immediately
+
+    local vinput = game:GetService("VirtualInputManager")
+
+    local foundAltar = false
+
+    if rooms then
+        for _, v in ipairs(rooms:GetChildren()) do
+            if v:FindFirstChild("RealName") and v.Name ~= "LongHallway" then
+                local name = v.RealName.Value or v.RealName
+                if name == "Echo" or name == "Chance" or name == "Purgatory" then
+                    if v:FindFirstChild("Prompt") then
+                        print("677676FOUND3")
+                        hrp.CFrame = v.Prompt.CFrame * CFrame.new(0, 0, -2)
+                        task.wait(0.1)
+                        vinput:SendKeyEvent(true, Enum.KeyCode.F, false, game)
+                        task.wait(1)
+                        vinput:SendKeyEvent(false, Enum.KeyCode.F, false, game)
+						v.Prompt:Destroy()
+                        foundAltar = true
+
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    if not foundAltar then
+        print("No valid altar found")
+    end
+
+    busy = false  -- always unlock at the end
+end
         if not rooms or #rooms:GetChildren() == 0 then
 -- SELECTION SCREEN HANDLING
 -- SELECTION SCREEN HANDLING
@@ -183,7 +217,7 @@ if selectFolder and _G.AutoPick then
     if hrp then
         local enemychoice1 = {"Skinwalker", "Bell", "Mart", "Springer", "Dozer"}
         local enemychoice2 = {"NIL", "Baby", "ICBM", "Flesh", "Voidbreaker", "Telefragger"}
-        local enemychoice3 = {"Guardian", "Voidbound Baby", "Voidbound Guardian", "???", "Kookoo", "Cadence"}
+        local enemychoice3 = {"Guardian", "Voidbound Baby", "Voidbound Guardian", "???", "Kookoo", "Cadence", "Random"}
 
         local cursechoice1 = {
             "IceTiles", "LowerGravity", "RandomSpawn", "WeakJumpPads", "BiggerTripmine",
@@ -256,7 +290,7 @@ end
         ----------------------------------------------------
         -- GIFT COLLECTION HANDLING
         ----------------------------------------------------
-
+        if not busy then  -- only move to gifts if no addon is active
         local gifts = getAllGifts()
 
         if #gifts > 0 then
@@ -266,7 +300,7 @@ end
             end
 
         else
-            task.wait(0.3)
+            task.wait(0.6)
 
             local recheck = getAllGifts()
             if #recheck == 0 and beacon then
@@ -274,6 +308,7 @@ end
             end
         end
     end
+	end
 end)
 
 ----------------------------------------------------
@@ -302,6 +337,15 @@ Tab:CreateToggle({
     Flag = "AutoPick",
     Callback = function(Value)
         _G.AutoPick = Value
+    end,
+})
+
+Tab:CreateToggle({
+    Name = "Auto activate altar of chance, echo and purgatory",
+    CurrentValue = false,
+    Flag = "AutoAltar",
+    Callback = function(Value)
+        _G.AutoAltar = Value
     end,
 })
 
