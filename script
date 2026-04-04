@@ -213,8 +213,6 @@ if selectFolder and _G.AutoPick then
         end
     end
 end
-end
-end
             continue
         end
 
