@@ -355,3 +355,10 @@ Tab2:CreateButton({
         Rayfield:Destroy()
     end,
 })
+
+Tab:CreateButton({
+    Name = "tp to beacon",
+    Callback = function()
+        Rayfield:Destroy()
+    end,
+})
